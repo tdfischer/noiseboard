@@ -1,0 +1,132 @@
+<!DOCTYPE HTML >
+<html>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.4/p5.js"></script>
+<style>
+<!--
+@import url(http://fonts.googleapis.com/css?family=Source+Code+Pro);
+
+body {
+  margin: 0;
+  background-color: #000;
+  color: #fff;
+  font-family: "Source Code Pro";
+  font-size: 24pt;
+  width: 50%;
+}
+
+body canvas {
+  margin: auto;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+h1 {
+  border-bottom: 20px solid red;
+  line-height: 1em;
+}
+
+h2 {
+  border-bottom: 10px solid #a00;
+  line-height: 1em;
+}
+
+.bart-RED {
+  color: #e11a57;
+}
+
+.bart-GREEN {
+  color: #4fb848;
+}
+
+.bart-ORANGE {
+  color: #f9a11d;
+}
+
+.bart-YELLOW {
+  color: #fdf057;
+}
+
+.bart-BLUE {
+  color: #2aabe2;
+}
+
+.muni {
+  color: #d31245;
+}
+
+table {
+  width: 100%;
+}
+
+.irc {
+  list-style: none;
+}
+-->
+</style>
+<body>
+<script>
+<!--
+var img;
+var smallPoint, largePoint;
+var canvasSize;
+
+function setup() {
+  canvasSize = min(windowWidth/2, windowHeight);
+  createCanvas(canvasSize, canvasSize);
+  img = loadImage("{{url_for('static', filename='noisebridge.png')}}");
+  smallPoint = 4;
+  largePoint = 10;
+  imageMode(CENTER);
+  colorMode(RGB);
+  noStroke();
+  background(0);
+  frameRate(120);
+}
+
+function draw() { 
+  for(var i = 0; i < 1000; i++ ) {
+    var x = floor(random(img.width));
+    var y = floor(random(img.height));
+    var size = ceil(random(smallPoint, largePoint));
+    var pix = img.get(x, y);
+    fill(pix, 128);
+    ellipse(canvasSize * (x/img.width), canvasSize * (y/img.height), size,
+        size);
+  }
+}
+
+$(document).ready(function() {
+  $.ajax('/bart').done(function(sched) {
+    $(sched.root.station.etd).each(function(idx, line) {
+      var estimates = new Array();
+      var cls;
+      $(line.estimate).each(function(idx, etd) {
+          estimates.push(etd.minutes);
+          cls = 'bart-'+etd.color;
+      });
+      $('#transit').append('<tr class="'+cls+'"><td>'+line.destination+'</td><td>'+estimates.join(', ')+'</td></tr>');
+    });
+  });
+});
+-->
+</script>
+<h1>Welcome to Noisebridge</h1>
+<h2>Upcoming Events</h2>
+<ul>
+  <li>Thursday, May 21st 2015: 5 Minutes of Fame</li>
+</ul>
+<h2>Transit</h2>
+<table id="transit">
+  <tr class="muni">
+    <td>14R</td>
+    <td>8 minutes</td>
+  </tr>
+</table>
+<h2>Live IRC</h2>
+<ul class="irc">
+  <li>&lt;tdfischer&gt; foo</li>
+</ul>
+</body>
+</html>
