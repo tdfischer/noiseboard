@@ -11,7 +11,7 @@ body {
   background-color: #000;
   color: #fff;
   font-family: "Source Code Pro";
-  font-size: 24pt;
+  font-size: 20pt;
   width: 50%;
 }
 
@@ -32,28 +32,55 @@ h2 {
   line-height: 1em;
 }
 
+#transit td {
+  padding: 5px;
+  padding-left: 45px;
+  background-size: 32px;
+  background-position: 5px center;
+}
+
+#twitter {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  width: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  height: 100%;
+  border-left: 2px solid red;
+}
+
+.bart td.route {
+  background: url({{url_for('static', filename='bart.png')}}) no-repeat;
+}
+
 .bart-RED {
-  color: #e11a57;
+  background-color: #e11a57;
 }
 
 .bart-GREEN {
-  color: #4fb848;
+  background-color: #4fb848;
 }
 
 .bart-ORANGE {
-  color: #f9a11d;
+  background-color: #f9a11d;
 }
 
 .bart-YELLOW {
-  color: #fdf057;
+  background-color: #fdf057;
+  color: #000;
 }
 
 .bart-BLUE {
-  color: #2aabe2;
+  background-color: #2aabe2;
 }
 
 .muni {
-  color: #d31245;
+  background-color: #d31245;
+}
+
+.muni td.route {
+  background: url({{url_for('static', filename='muni.png')}}) left center no-repeat;
 }
 
 table {
@@ -98,18 +125,27 @@ function draw() {
 }
 
 $(document).ready(function() {
+  update();
+});
+
+function update() {
+  $('#transit tr').remove();
   $.ajax('/bart').done(function(sched) {
     $(sched.root.station.etd).each(function(idx, line) {
       var estimates = new Array();
       var cls;
       $(line.estimate).each(function(idx, etd) {
           estimates.push(etd.minutes);
-          cls = 'bart-'+etd.color;
+          cls = 'bart bart-'+etd.color;
       });
-      $('#transit').append('<tr class="'+cls+'"><td>'+line.destination+'</td><td>'+estimates.join(', ')+'</td></tr>');
+      $('#transit').append('<tr class="'+cls+'"><td class="route">'+line.destination+'</td><td>'+estimates.join(', ')+'</td></tr>');
     });
+    $('#transit').append('<tr class="muni"><td class="route">14</td><td>Probably fucked</td></tr>');
+    $('#transit').append('<tr class="muni"><td class="route">33</td><td>Probably fucked</td></tr>');
+    $('#transit').append('<tr class="muni"><td class="route">49</td><td>Probably fucked</td></tr>');
+    window.setTimeout(update, 30000);
   });
-});
+}
 -->
 </script>
 <h1>Welcome to Noisebridge</h1>
@@ -119,14 +155,11 @@ $(document).ready(function() {
 </ul>
 <h2>Transit</h2>
 <table id="transit">
-  <tr class="muni">
-    <td>14R</td>
-    <td>8 minutes</td>
-  </tr>
 </table>
-<h2>Live IRC</h2>
-<ul class="irc">
-  <li>&lt;tdfischer&gt; foo</li>
-</ul>
+<div id="twitter">
+  <h2>Twitter</h2>
+  <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/search?q=noisebridge" data-widget-id="601775481310982144">Tweets about noisebridge</a>
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</div>
 </body>
 </html>
