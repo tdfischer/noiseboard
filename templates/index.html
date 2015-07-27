@@ -2,6 +2,7 @@
 <html>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.4/p5.js"></script>
+<script src="/static/bower_components/moment/moment.js"></script>
 <style>
 <!--
 @import url(http://fonts.googleapis.com/css?family=Source+Code+Pro);
@@ -17,6 +18,7 @@ body {
 
 body canvas {
   margin: auto;
+  z-index: -1;
   position: absolute;
   right: 0;
   top: 0;
@@ -39,7 +41,7 @@ h2 {
   background-position: 5px center;
 }
 
-#twitter {
+#right {
   position: absolute;
   top: 0;
   right: 0;
@@ -48,6 +50,33 @@ h2 {
   background: rgba(0, 0, 0, 0.5);
   height: 100%;
   border-left: 2px solid red;
+  font-size: small;
+}
+
+#twitter {
+  width: 50%;
+  float: right;
+}
+
+#twitter .tweet {
+  list-style: none;
+  border-bottom: solid red;
+  padding: 5px;
+  min-height: 48px;
+}
+
+#twitter .tweet img {
+  float: left;
+  width: 48px;
+}
+
+#twitter .tweet p {
+  margin-left: 60px;
+  margin-top: 0;
+}
+
+#twitter .pad {
+  padding: 20px;
 }
 
 .bart td.route {
@@ -98,18 +127,26 @@ table {
 var img;
 var smallPoint, largePoint;
 var canvasSize;
+var offsetX = 0;
+var offsetY = 0;
+var velocityX = 1;
+var velocityY = 1;
 
 function setup() {
   canvasSize = min(windowWidth/2, windowHeight);
-  createCanvas(canvasSize, canvasSize);
+  createCanvas(windowWidth, windowHeight);
   img = loadImage("{{url_for('static', filename='noisebridge.png')}}");
-  smallPoint = 4;
+  smallPoint = 5;
   largePoint = 10;
   imageMode(CENTER);
   colorMode(RGB);
   noStroke();
   background(0);
   frameRate(120);
+  offsetX = Math.random()*canvasSize;
+  offsetY = Math.random()*canvasSize;
+  velocityX = Math.random()*10;
+  velocityY = Math.random()*10;
 }
 
 function draw() { 
@@ -119,8 +156,18 @@ function draw() {
     var size = ceil(random(smallPoint, largePoint));
     var pix = img.get(x, y);
     fill(pix, 128);
-    ellipse(canvasSize * (x/img.width), canvasSize * (y/img.height), size,
+    ellipse(canvasSize * (x/img.width) + offsetX - canvasSize/2, canvasSize * (y/img.height) + offsetY - canvasSize/2, size,
         size);
+  }
+  offsetX += velocityX;
+  offsetY += velocityY;
+  if (offsetX >= windowWidth || offsetX <= 0) {
+    velocityX *= -1;
+    offsetX += velocityX;
+  }
+  if (offsetY >= windowHeight || offsetY <= 0) {
+    velocityY *= -1;
+    offsetY += velocityY;
   }
 }
 
@@ -128,9 +175,19 @@ $(document).ready(function() {
   update();
 });
 
+function eventSort(a, b) {
+  if (a.start < b.start) {
+    return -1;
+  }
+  if (a.start > b.start) {
+    return 1;
+  }
+  return 0;
+}
+
 function update() {
-  $('#transit tr').remove();
   $.ajax('/bart').done(function(sched) {
+    $('#transit tr.bart').remove();
     $(sched.root.station.etd).each(function(idx, line) {
       var estimates = new Array();
       var cls;
@@ -140,26 +197,51 @@ function update() {
       });
       $('#transit').append('<tr class="'+cls+'"><td class="route">'+line.destination+'</td><td>'+estimates.join(', ')+'</td></tr>');
     });
-    $('#transit').append('<tr class="muni"><td class="route">14</td><td>Probably fucked</td></tr>');
-    $('#transit').append('<tr class="muni"><td class="route">33</td><td>Probably fucked</td></tr>');
-    $('#transit').append('<tr class="muni"><td class="route">49</td><td>Probably fucked</td></tr>');
     window.setTimeout(update, 30000);
+  });
+
+  $('#transit tr.muni').remove();
+  $('#transit').append('<tr class="muni"><td class="route">14</td><td>Probably fucked</td></tr>');
+  $('#transit').append('<tr class="muni"><td class="route">33</td><td>Probably fucked</td></tr>');
+  $('#transit').append('<tr class="muni"><td class="route">49</td><td>Probably fucked</td></tr>');
+
+  $.ajax('/events').done(function(sched) {
+    $('#events li').remove();
+    var parsedEvents = [];
+    $(sched.events).each(function(idx, event) {
+        parsedEvents.push({title: event.title, start: new Date(event.start)});
+    });
+    var sorted = parsedEvents.sort(eventSort);
+    var now = new Date();
+    $(sorted.slice(0, 5)).each(function(idx, event) {
+      var delta = moment(event.start).fromNow();
+      $('#events').append('<li>'+delta+': '+event.title+'</li>');
+    });
+  });
+
+  $.ajax('/twitter').done(function(data) {
+    $('#timeline li').remove();
+    $(data.tweets.statuses.slice(0, 6)).each(function(idx, tweet) {
+        $('#timeline').append('<li class="tweet"><img src="'+tweet.user.profile_image_url_https+'"><p>'+tweet.user.name+': '+tweet.text+'</p></li>');
+    });
   });
 }
 -->
 </script>
 <h1>Welcome to Noisebridge</h1>
 <h2>Upcoming Events</h2>
-<ul>
+<ul id="events">
   <li>Thursday, May 21st 2015: 5 Minutes of Fame</li>
 </ul>
 <h2>Transit</h2>
 <table id="transit">
 </table>
-<div id="twitter">
-  <h2>Twitter</h2>
-  <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/search?q=noisebridge" data-widget-id="601775481310982144">Tweets about noisebridge</a>
-  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+<div id="right">
+  <div id="twitter">
+    <h2>Twitter</h2>
+    <ul id="timeline">
+    </ul>
+  </div>
 </div>
 </body>
 </html>
