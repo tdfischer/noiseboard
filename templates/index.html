@@ -12,7 +12,7 @@ body {
   background-color: #000;
   color: #fff;
   font-family: "Source Code Pro";
-  font-size: 20pt;
+  font-size: 16pt;
   width: 50%;
 }
 
@@ -41,20 +41,24 @@ h2 {
   background-position: 5px center;
 }
 
+#content {
+  background: rgba(0, 0, 0, 0.5);
+  height: 100%;
+  width: 100%;
+}
+
 #right {
   position: absolute;
   top: 0;
   right: 0;
   z-index: 1;
   width: 50%;
-  background: rgba(0, 0, 0, 0.5);
   height: 100%;
   border-left: 2px solid red;
   font-size: small;
 }
 
 #twitter {
-  width: 50%;
   float: right;
 }
 
@@ -228,19 +232,21 @@ function update() {
 }
 -->
 </script>
-<h1>Welcome to Noisebridge</h1>
-<h2>Upcoming Events</h2>
-<ul id="events">
-  <li>Thursday, May 21st 2015: 5 Minutes of Fame</li>
-</ul>
-<h2>Transit</h2>
-<table id="transit">
-</table>
-<div id="right">
-  <div id="twitter">
-    <h2>Twitter</h2>
-    <ul id="timeline">
-    </ul>
+<div id="content">
+  <h1>Welcome to Noisebridge</h1>
+  <h2>Upcoming Events</h2>
+  <ul id="events">
+    <li>Thursday, May 21st 2015: 5 Minutes of Fame</li>
+  </ul>
+  <h2>Transit</h2>
+  <table id="transit">
+  </table>
+  <div id="right">
+    <div id="twitter">
+      <h2>Twitter</h2>
+      <ul id="timeline">
+      </ul>
+    </div>
   </div>
 </div>
 </body>
