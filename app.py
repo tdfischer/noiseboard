@@ -47,3 +47,7 @@ def twitter():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+# uwsgi compatability
+application = app
