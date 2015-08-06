@@ -1,0 +1,24 @@
+---
+- hosts: ratchet.noisebridge.systems
+  sudo: true
+  vars_files:
+    - ../../noiseboard-private.yml
+  tasks:
+    - name: Stand up noiseboard docker container
+      docker:
+        name: noiseboard
+        pull: always
+        restart_policy: on-failure
+        state: reloaded
+        image: tdfischer/noiseboard:latest
+          # See, this is why we need uwsgi in the docker container.
+          # Ratchet is a debian 7.8 host, and fedora's gunicorn is newer than
+          # the host kernel's eventfd api.
+        command: 'uwsgi --http 0.0.0.0:3000 --master --module app'
+        env:
+          TWITTER_CONSUMER_KEY: '{{noiseboard_twitter_consumer_key}}'
+          TWITTER_CONSUMER_SECRET: '{{noiseboard_twitter_consumer_secret}}'
+          TWITTER_ACCESS_TOKEN: '{{noiseboard_twitter_access_token}}'
+          TWITTER_ACCESS_TOKEN_SECRET: '{{noiseboard_twitter_access_secret}}'
+        ports:
+          - "3000:3000"
