@@ -29,7 +29,7 @@ def bart():
 
 @app.route("/events")
 def events():
-    cal = Calendar.from_ical(requests.get('http://ratchet.noisebridge.systems/~phong/events.ical').text)
+    cal = Calendar.from_ical(requests.get('http://api.meetup.com/noisebridge/upcoming.ical').text)
     events = []
     for event in cal.walk('vevent'):
         events.append({
